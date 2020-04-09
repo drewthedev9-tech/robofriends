@@ -1,9 +1,23 @@
 import React, {Component} from 'react';
+import {connect} from 'react-redux';
 import CardList from '../components/CardList.js';
 import SearchBox from '../components/SearchBox.js'
 import Scroll from '../components/Scroll.js'
-import './App.css';
 
+import './App.css';
+import {setSearchField} from '../actions.js'
+
+const mapStateToProps = state =>{
+    return {
+        searchField: state.searchField
+    }
+}
+
+const mapDispatchToProps = (dispatch) =>{
+    return {
+        onSearchChange: (event) => dispatch(setSearchField(event.target.value))
+    }
+}
 
 
 // declaring a class the react way instead of function
@@ -13,7 +27,7 @@ class App extends Component {
         super()
         this.state = {
             robots : [], 
-            searchfield:''
+           
         }
 }
 
@@ -22,6 +36,7 @@ class App extends Component {
 // fetch gets the file from URL, fetch also comes with its own method too called
 // Json
 componentDidMount() {
+   
     fetch('https://jsonplaceholder.typicode.com/users')
     .then(response => response.json())
     // ,then needs to be here to return after the promise is made by json function
@@ -29,15 +44,12 @@ componentDidMount() {
     .then(users => this.setState({robots:users}));
 }
 
-onSearchChange =(event) => {
-    // This changes the state. SetState is a mthod that comes with react.
-    this.setState({ searchfield:event.target.value})
-}
-    render (){
+  render (){
         // destructured to clean code.
-        const {robots, searchfield} = this.state;
+        const {robots} = this.state;
+        const {searchField, onSearchChange} = this.props;
         const filteredRobots = robots.filter(robot =>{
-            return robot.name.toLowerCase().includes(searchfield.toLowerCase());
+            return robot.name.toLowerCase().includes(searchField.toLowerCase());
         })
        return !robots.length ?
      <h1>Loading</h1>:
@@ -45,7 +57,7 @@ onSearchChange =(event) => {
             // Components, they are reusable.
             <div className = 'tc'>
                 <h1 className='f1 red'>Robo Friends</h1>
-                <SearchBox searchChange = {this.onSearchChange}/>
+                <SearchBox searchChange = {onSearchChange}/>
                 <Scroll>
                     <CardList robots = {filteredRobots}/>
                 </Scroll>
@@ -59,4 +71,4 @@ onSearchChange =(event) => {
 
 
     
-export default App;
+    export default connect(mapStateToProps, mapDispatchToProps)(App);
